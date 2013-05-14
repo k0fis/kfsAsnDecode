@@ -77,7 +77,7 @@ public class NodeFactory {
             throw new ASNException("Defensive check failed");
         }
         if (asnField.type.isArray()) {
-            throw new ASNException("Defensive check failed. This is array ");
+            throw new ASNException("Defensive check failed. This is array: " + asnField.longName + ", "+b.getMetaString());
         }
 
         Node retNode = new Node(asnField, null, b);
@@ -104,7 +104,7 @@ public class NodeFactory {
                 return makeNode(farrChild, subBlock, maxBlocks, depth + 1, cb);
             } else {
                 throw new ASNException("" + f + " " + subBlock 
-                        + "Field does not have a array subField, but encountered Universal tag 16|17");
+                        + "Field does not have a array subField, but encountered Universal tag 16|17: " + subBlock.toDetailedString(true));
             }
         }
         return null;

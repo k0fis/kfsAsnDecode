@@ -234,7 +234,7 @@ public class Field {
         if (type.isPrimitive()) {
             // Ideally one should not be calling this method for primitive field. Unless there is 
             // mismatch between data and grammar.
-            throw new ASNException("getArrayChildWithoutPos() called on a primitive field");
+            throw new ASNException("getArrayChildWithoutPos() called on a primitive field: " + type.name);
         }
 
         for (int i = 0; i < type.fields.length; i++) {
