@@ -1,6 +1,7 @@
 package kfs.kfsAsnDecode;
 
 import java.util.ArrayList;
+import org.apache.log4j.Logger;
 
 public class NodeFactory {
 
@@ -77,7 +78,7 @@ public class NodeFactory {
             throw new ASNException("Defensive check failed");
         }
         if (asnField.type.isArray()) {
-            throw new ASNException("Defensive check failed. This is array: " + asnField.longName + ", "+b.getMetaString());
+            throw new ASNException("Defensive check failed. This is array ");
         }
 
         Node retNode = new Node(asnField, null, b);
@@ -104,7 +105,7 @@ public class NodeFactory {
                 return makeNode(farrChild, subBlock, maxBlocks, depth + 1, cb);
             } else {
                 throw new ASNException("" + f + " " + subBlock 
-                        + "Field does not have a array subField, but encountered Universal tag 16|17: " + subBlock.toDetailedString(true));
+                        + "Field does not have a array subField, but encountered Universal tag 16|17");
             }
         }
         return null;
@@ -159,9 +160,10 @@ public class NodeFactory {
                     subNodes[i] = makeNode(childField, subBlock, maxBlocks, depth + 1, cb);
                 } else { // -- composite | not array | choice
                     Field[] retFieldArr = f.getGrandChildField(sbpos);
-                    if (retFieldArr == null) {
+                    if (retFieldArr == null) {                        
                         String str = "Unable to find child field or grandchild field for given tag. subBlock.tag(" + sbpos + ") field(" + f + ")";
-                        throw new ASNException("makeNode", str);
+                        Logger.getLogger(NodeFactory.class).fatal(str);
+                        //throw new ASNException("makeNode", str);
                     } else {
                         childField = retFieldArr[0];
                         Field grandChildField = retFieldArr[1];
@@ -173,10 +175,10 @@ public class NodeFactory {
             } // for ( subBlocks ) 
         } catch (ASNException e) { // Catch Exception if thrown by recursive makeNode(), append stack Info and re throw. 
             if (e.isType("makeNode")) {
-                throw new ASNException("makeNode", "\n makeNode(" + f + "," + b + ") " + e.getMessage());
+                throw new ASNException("makeNode", "\n makeNode(" + f + "," + b + ") " + e.getMessage(), e);
             }
             if (e.isType("makeNodeArray")) {
-                throw new ASNException("makeNodeArray", "\n makeNodeArray(" + f + "," + b + ") " + e.getMessage());
+                throw new ASNException("makeNodeArray", "\n makeNodeArray(" + f + "," + b + ") " + e.getMessage(), e);
             }
             throw e;
         }

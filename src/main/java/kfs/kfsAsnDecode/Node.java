@@ -116,11 +116,7 @@ public class Node {
                 throw new ASNException("Inconsistant Node - Field is non array primitive but "
                         + "Block is Composite. " + this.field + " " + this.getBlock());
             }
-            if (this.subNodes != null) {
             obj = new PrimitiveClass("Composite1(" + this.subNodes.length + ")");
-            } else {
-                obj = new PrimitiveClass("Composite0(0)");
-            }
         } else {
             Map<String, Integer> map = ASNConst.getPrimitiveMap();
             int tag = map.get(field.type.name);

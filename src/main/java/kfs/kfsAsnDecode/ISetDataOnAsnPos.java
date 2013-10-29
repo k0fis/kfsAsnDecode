@@ -6,4 +6,5 @@ package kfs.kfsAsnDecode;
  */
 public interface ISetDataOnAsnPos {
     void setDataOnAsnPos(int asnPos, Object data);
+    void doneSetting();
 }

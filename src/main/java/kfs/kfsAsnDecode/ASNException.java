@@ -19,6 +19,12 @@ public class ASNException extends RuntimeException {
         type = t;
     }
 
+    public ASNException(String t, String s, Throwable ex) {
+        //super(t, ex);
+        msg = s;
+        type = t;
+    }
+
     public boolean isType(String s) {
         boolean ret;
         if (s != null) {
