@@ -1,5 +1,8 @@
 package kfs.kfsAsnDecode;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
@@ -8,7 +11,7 @@ public class NodeFactory {
     /**
      * Converts a ASN data file to a Node
      */
-    public static Node kfsParse(byte [] byteArr, String grammarFile, kfsNodeCallBack cb) {
+    public static Node kfsParse(byte[] byteArr, String grammarFile, kfsNodeCallBack cb) {
         Field rootField = ASNClassFactory.getField(grammarFile);
         EBlock rootBlock = new EBlock(0, 0, byteArr, 0, 0, byteArr.length);
 
@@ -30,6 +33,26 @@ public class NodeFactory {
         //return topNode.subNodes;
         return topNode;
     }
+
+    public static Node parse(InputStream dataFile, String grammarFile, kfsNodeCallBack cb) throws IOException {
+        Field rootField = ASNClassFactory.getField(grammarFile);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        int next = dataFile.read();
+        while (next > -1) {
+            bos.write(next);
+            next = dataFile.read();
+        }
+        bos.flush();
+        byte[] byteArr = bos.toByteArray();
+        EBlock rootBlock = new EBlock(0, 0, byteArr, 0, 0, byteArr.length);
+
+        Node topNode = NodeFactory.makeNode(rootField, rootBlock, -1, 0, cb);
+        // Assumption is that for all Grammar files the topNode's type is always an array
+        // ie.   topNode.getType().isArray() == true
+        //return topNode.subNodes;
+        return topNode;
+    }
+
     static byte[] dummyArr = new byte[10];
     static EBlock dummyBlock = new EBlock(0, 8, dummyArr, 0, 2, 10);
 
@@ -104,7 +127,7 @@ public class NodeFactory {
             if (farrChild != null) {
                 return makeNode(farrChild, subBlock, maxBlocks, depth + 1, cb);
             } else {
-                throw new ASNException("" + f + " " + subBlock 
+                throw new ASNException("" + f + " " + subBlock
                         + "Field does not have a array subField, but encountered Universal tag 16|17");
             }
         }
@@ -128,7 +151,7 @@ public class NodeFactory {
         }
         //System.out.printf("\n makeNode("+f + "," + b + ")" );
         // Recursive makeNode(f,b)
-        
+
         Node[] subNodes = null;
         try {
             if (b.isLeaf()) {
@@ -160,7 +183,7 @@ public class NodeFactory {
                     subNodes[i] = makeNode(childField, subBlock, maxBlocks, depth + 1, cb);
                 } else { // -- composite | not array | choice
                     Field[] retFieldArr = f.getGrandChildField(sbpos);
-                    if (retFieldArr == null) {                        
+                    if (retFieldArr == null) {
                         String str = "Unable to find child field or grandchild field for given tag. subBlock.tag(" + sbpos + ") field(" + f + ")";
                         Logger.getLogger(NodeFactory.class).fatal(str);
                         //throw new ASNException("makeNode", str);
@@ -188,7 +211,6 @@ public class NodeFactory {
     }
 
     private static Node makeNodeArray(Field f, EBlock b, int maxBlocks, int depth, kfsNodeCallBack cb) {
-
 
         ArrayList<EBlock> subBlocks = b.getSubBlocks(EBlock.MAX_BLOCKS, f.type.blockSize, f.type.paddingByte);
         Node[] subNodes = new Node[subBlocks.size()];
