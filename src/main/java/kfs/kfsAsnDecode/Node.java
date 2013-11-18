@@ -38,6 +38,7 @@ public class Node {
      * @return referenced node if this node is a reference node, else returns NULL_NODE;
      */
     public Node getSubNodeChoice() {
+        if (subNodes == null) return NULL_NODE;
         return isChoice() ? subNodes[0] : NULL_NODE;
     }
     /**
@@ -116,7 +117,11 @@ public class Node {
                 throw new ASNException("Inconsistant Node - Field is non array primitive but "
                         + "Block is Composite. " + this.field + " " + this.getBlock());
             }
-            obj = new PrimitiveClass("Composite1(" + this.subNodes.length + ")");
+            if (this.subNodes != null) {
+                obj = new PrimitiveClass("Composite1(" + this.subNodes.length + ")");
+            } else {
+                obj = new PrimitiveClass("Composite1(0 )");
+            }
         } else {
             Map<String, Integer> map = ASNConst.getPrimitiveMap();
             int tag = map.get(field.type.name);
@@ -206,6 +211,9 @@ public class Node {
      * @return - The name of the field associated with this Node.
      */
     public String getFieldName() {
+        if (field == null) {
+            return "null";
+        }
         return field.name;
     }
 
