@@ -186,7 +186,9 @@ public class NodeFactory {
                     if (retFieldArr == null) {
                         String str = "Unable to find child field or grandchild field for given tag. subBlock.tag(" + sbpos + ") field(" + f + ")";
                         Logger.getLogger(NodeFactory.class).fatal(str);
-                        cb.kfsCb(new Node(f, new Node[0], dummyBlock));
+                        
+                        subNodes[i] = makeNodeIndicator(childField, subBlock);
+                        //new Node(childField, new Node[0], subBlock);
                         //throw new ASNException("makeNode", str);
                     } else {
                         childField = retFieldArr[0];
@@ -211,6 +213,12 @@ public class NodeFactory {
         return n;
     }
 
+    private static Node makeNodeIndicator(Field f, EBlock b) {
+        Node ret = new Node(f, new Node[0], b);
+        ret.indicator = true;
+        return ret;
+    }
+    
     private static Node makeNodeArray(Field f, EBlock b, int maxBlocks, int depth, kfsNodeCallBack cb) {
 
         ArrayList<EBlock> subBlocks = b.getSubBlocks(EBlock.MAX_BLOCKS, f.type.blockSize, f.type.paddingByte);

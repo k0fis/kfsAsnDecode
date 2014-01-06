@@ -9,6 +9,17 @@ import java.util.Map;
  */
 public class ASNClass {
 
+    private boolean isIndicator;
+    
+    public boolean isIndicator() {
+        return isIndicator;
+    }
+    
+    public ASNClass setIndicator(boolean  indi) {
+        this.isIndicator = indi;
+        return this;
+    }
+    
     /**
      * Non zero value indicates a fixed block. By default this is zero. Typically fixed block sizes
      * are either 1024 or 2048 or

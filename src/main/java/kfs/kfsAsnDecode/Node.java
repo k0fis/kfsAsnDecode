@@ -9,6 +9,8 @@ import java.util.Map;
  */
 public class Node {
 
+    public boolean indicator = false;
+    
     /**
      * If Node is a Primitive ASN Class. The the primitive data is stored within primitive object,
      * else it is set to null.
