@@ -76,7 +76,12 @@ public class RawClassFactory {
 
         String[] convStr = convertStr(fileStr);
         if (convStr == null) {
-            throw new ASNException("ASN Grammar File(" + fileName + ") does not contain any module.");
+            // try it again - some shit happens :(
+            fileStr = Util.toStringArray(fileName); //fileToString(inputFile);		
+            convStr = convertStr(fileStr);
+            if (convStr == null) {
+                throw new ASNException("ASN Grammar File(" + fileName + ") does not contain any module.");
+            }
         }
 
         for (int i = 0; i < convStr.length; i++) {
@@ -465,7 +470,6 @@ public class RawClassFactory {
         gOthers = 12;
         // Eg.		 -field-name  [ 10 ] SET OF -class-name-(SIZE(15..43))OPTIONAL";
 
-
         // NOTE: Group Positions are same for singleLiner and MultiLinerFirstLine
         String singleLiner = "\\s*" + hword + "\\s*::=\\s*" + pos + "\\s+" + implicit + relationArray + type + "\\s*" + size + "\\s*.*";
         // Groups of Interest           1                                                         [6]            7              [11] 		
@@ -476,7 +480,6 @@ public class RawClassFactory {
 
         String multiLinerFirstLine = "\\s*" + hword + "\\s*::=\\s*" + pos + "\\s+" + implicit + relationNorm + type + "\\s*" + size + "\\s*.*";
         // Groups of Interest                    1                      [4]                                                    [9] 		
-
 
         return name.equals("multiLinerChild") ? multiLinerChild : (name.equals("singleLiner") ? singleLiner : multiLinerFirstLine);
     }

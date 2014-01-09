@@ -45,9 +45,7 @@ public class Util {
     // Converts a file into an array of Strings and caches it for future requests.
     public static String[] toStringArray(String filename) {
 
-        if (mapOfFileNameToStringArray.containsKey(filename)) {
-            return mapOfFileNameToStringArray.get(filename);
-        }
+        //if (mapOfFileNameToStringArray.containsKey(filename)) { return mapOfFileNameToStringArray.get(filename); }
         List<String> lines = new ArrayList<String>();
 
         try {
@@ -64,10 +62,10 @@ public class Util {
             throw new ASNException("Caught IOException:" + e.getMessage());
         }
 
-        String[] linesArr = new String[lines.size()];
-        lines.toArray(linesArr);
-        mapOfFileNameToStringArray.put(filename, linesArr);
-        return linesArr;
+        //String[] linesArr = new String[lines.size()];
+        return lines.toArray(new String[lines.size()]);
+        //mapOfFileNameToStringArray.put(filename, linesArr);
+        //return linesArr;
     }
 
     /**
@@ -94,7 +92,7 @@ public class Util {
         }
         return rarr;
     }
-    private static HashMap<String, String[]> mapOfFileNameToStringArray = new HashMap<String, String[]>();
+    //private static HashMap<String, String[]> mapOfFileNameToStringArray = new HashMap<String, String[]>();
 
     // Useful in PrimitiveClass methods.
     public static String byteArrayToIA5String(byte[] inByte) {
