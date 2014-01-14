@@ -145,7 +145,7 @@ public class kfsTest /*
             System.out.println("Cannot open file:  " + inputGrammarFile);
 
         } else {
-            Field ff = ASNClassFactory.getField(inputGrammarFile);
+            Field ff = ASNClassFactory.getField(new kfsGramarFile(inputGrammarFile));
 
             for (int ii : new int[]{}) {
                 ArrayList<String> s = new ArrayList<String>();

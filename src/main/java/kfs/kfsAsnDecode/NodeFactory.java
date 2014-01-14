@@ -11,7 +11,7 @@ public class NodeFactory {
     /**
      * Converts a ASN data file to a Node
      */
-    public static Node kfsParse(byte[] byteArr, String grammarFile, kfsNodeCallBack cb) {
+    public static Node kfsParse(byte[] byteArr, kfsGramarFile grammarFile, kfsNodeCallBack cb) {
         Field rootField = ASNClassFactory.getField(grammarFile);
         EBlock rootBlock = new EBlock(0, 0, byteArr, 0, 0, byteArr.length);
 
@@ -22,7 +22,7 @@ public class NodeFactory {
         return topNode;
     }
 
-    public static Node parse(String dataFile, String grammarFile, kfsNodeCallBack cb) {
+    public static Node parse(String dataFile, kfsGramarFile grammarFile, kfsNodeCallBack cb) {
         Field rootField = ASNClassFactory.getField(grammarFile);
         byte[] byteArr = Util.FileToByteArray(dataFile);
         EBlock rootBlock = new EBlock(0, 0, byteArr, 0, 0, byteArr.length);
@@ -34,7 +34,7 @@ public class NodeFactory {
         return topNode;
     }
 
-    public static Node parse(InputStream dataFile, String grammarFile, kfsNodeCallBack cb) throws IOException {
+    public static Node parse(InputStream dataFile, kfsGramarFile grammarFile, kfsNodeCallBack cb) throws IOException {
         Field rootField = ASNClassFactory.getField(grammarFile);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         int next = dataFile.read();

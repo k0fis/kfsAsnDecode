@@ -38,7 +38,7 @@ public class RawClass {
     /**
      * The file from which the RawClass was built
      */
-    public String fileName; // Name of the Grammar file where this class exists.
+    public kfsGramarFile fileName; // Name of the Grammar file where this class exists.
     /**
      * The line number at which this class can be found.
      */

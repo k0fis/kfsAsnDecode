@@ -1,6 +1,5 @@
 package kfs.kfsAsnDecode;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,7 +74,7 @@ public class ASNClassFactory {
 
 
 
-                            hitMultiLiner = tmp.singleLiner ? false : true;
+                            hitMultiLiner = !tmp.singleLiner;
                             if (!hitMultiLiner) {
                                 if (ASNConst.isPrimitive(tmp.synonymn)) // PRIMITIVE
                                 {
@@ -133,8 +132,8 @@ public class ASNClassFactory {
             String s = "Exception caught inside toASNClass(RawClass(" + rd.className + ")," + rd.fileName + ")";
             s += "\n e.getClass() = \"" + e.getClass() + "\" e.getMessage = {" + e.getMessage() + "}";
             StackTraceElement[] st = e.getStackTrace();
-            for (int i = 0; i < st.length; i++) {
-                s += "\n" + st[i];
+            for (StackTraceElement st1 : st) {
+                s += "\n" + st1;
             }
             throw new ASNException(s);
         }
@@ -150,10 +149,10 @@ public class ASNClassFactory {
      * @return - ASNClass representing the top level ASNClass in the specified grammar file. Always
      * the array version of the ASNClass is returned.
      */
-    public static Field getField(String fileName) {
+    public static Field getField(kfsGramarFile fileName) {
 
 
-        if (!mapOfFileASNClass.containsKey(fileName)) {
+        if (!mapOfFileASNClass.containsKey(fileName.filename)) {
 
             // TODO: currently the root Class is the first RawClass in module. Make it smart 
             // enough to detect root class if it isn't
@@ -169,14 +168,16 @@ public class ASNClassFactory {
             applyOptions(asnClass, options);
 
             Field rootField = new Field(Field.ROOTFIELD, Field.ROOTFIELD, ASNConst.POS_NOT_SPECIFIED, asnClass);
-            mapOfFileASNClass.put(fileName, rootField);
+            mapOfFileASNClass.put(fileName.filename, rootField);
         }
-        return mapOfFileASNClass.get(fileName);
+        return mapOfFileASNClass.get(fileName.filename);
     }
     // ========================================================================
 
     /**
      * Applies options to asnClass
+     * @param asnClass
+     * @param mapOptions
      */
     //TODO: check access level public/private..
     public static void applyOptions(ASNClass asnClass, Map<String, String> mapOptions) {
@@ -196,10 +197,13 @@ public class ASNClassFactory {
      * Assumes the format of Control file to be as Follows	* First Line of file should be
      * --OPTIONS-- name1=value1 , name2 = value2 , ... , namen = valuen Note - Comma and equals char
      * cannot be used in name and value.
+     * @param fileName
+     * @return 
      */
-    public static Map<String, String> loadControlFile(String fileName) {
+    public static Map<String, String> loadControlFile(kfsGramarFile fileName) {
 
-        String line = null;
+        String line = fileName.lines[0];
+        /*
         try {
             FileReader fileReader = new FileReader(fileName);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -210,6 +214,7 @@ public class ASNClassFactory {
         } catch (IOException e) {
             throw new ASNException("Caught IOException:" + e.getMessage());
         }
+        */
 
 
         Map<String, String> retMap = new HashMap<String, String>();
@@ -220,8 +225,8 @@ public class ASNClassFactory {
             line = line.substring(tagStrLen, line.length());
 
             String[] parts = line.split(",");
-            for (int i = 0; i < parts.length; i++) {
-                String option = parts[i].trim();
+            for (String part : parts) {
+                String option = part.trim();
                 String[] nameValPair = option.split("=");
                 if (nameValPair.length >= 2) {
                     retMap.put(nameValPair[0].trim(), nameValPair[1].trim());
@@ -237,7 +242,8 @@ public class ASNClassFactory {
     /**
      * Returns a ASNClass corresponding to the String primitiveName.
      *
-     * @param - Name of the primitive ASN Class.
+     * @param primitiveName name of the primitive ASN Class.
+     * @return 
      */
     public static ASNClass getPrimitiveASNClass(String primitiveName) {
 
