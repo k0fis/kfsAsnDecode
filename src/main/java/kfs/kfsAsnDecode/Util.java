@@ -68,6 +68,31 @@ public class Util {
         //return linesArr;
     }
 
+    public static String[] toStringArray(InputStream filename) {
+
+        //if (mapOfFileNameToStringArray.containsKey(filename)) { return mapOfFileNameToStringArray.get(filename); }
+        List<String> lines = new ArrayList<String>();
+
+        try {
+            InputStreamReader fileReader = new InputStreamReader(filename);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                lines.add(line);
+            }
+            bufferedReader.close();
+        } catch (FileNotFoundException e) {
+            throw new ASNException("Caught FileNotFound Exception:" + e.getMessage());
+        } catch (IOException e) {
+            throw new ASNException("Caught IOException:" + e.getMessage());
+        }
+
+        //String[] linesArr = new String[lines.size()];
+        return lines.toArray(new String[lines.size()]);
+        //mapOfFileNameToStringArray.put(filename, linesArr);
+        //return linesArr;
+    }
+
     /**
      * TODO: check if this is properly used/really needed
      */

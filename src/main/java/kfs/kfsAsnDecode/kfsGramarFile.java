@@ -1,5 +1,7 @@
 package kfs.kfsAsnDecode;
 
+import java.io.InputStream;
+
 /**
  *
  * @author pavedrim
@@ -17,5 +19,10 @@ public class kfsGramarFile {
     public kfsGramarFile(String filename) {
         this.filename = filename;
         this.lines = Util.toStringArray(filename);
+    }
+
+    public kfsGramarFile(String filename, InputStream inpuStream) {
+        this.filename = filename;
+        this.lines = Util.toStringArray(inpuStream);
     }
 }
