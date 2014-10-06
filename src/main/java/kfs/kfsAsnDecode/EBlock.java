@@ -75,7 +75,7 @@ public class EBlock {
         return this.fileBytes;
     }
     // =============================================================
-    int tag;
+    public int tag;
     int length;
     int fileOffset;  	   /*
      * The offset of this block in ASNData File
@@ -96,9 +96,9 @@ public class EBlock {
      * Instead of copying values, it saves memory to just keep track of original bytes in file
      * (fileBytes) as reference with a marker to valueStart and valueEnd
      */
-    byte[] fileBytes;
-    int valStart;  // Offset where the Block value start   | Say = 2
-    int valEnd; // One past the Offset where the Block value ends.  | Say = 3
+    public byte[] fileBytes;
+    public int valStart;  // Offset where the Block value start   | Say = 2
+    public int valEnd; // One past the Offset where the Block value ends.  | Say = 3
     // If value is zero bytes then valueStart = valueEnd.
     // If value is 1 bytes then valueStart = offset into fileBytes; and valueEnd = valueStart+1; 
     // In general value length = valueEnd - valueStart;
@@ -106,7 +106,7 @@ public class EBlock {
      * Tells if this block represents a Primitive Eg. INTEGER, OCTET STRING, etc. Is true if the
      * firstTagByte's bit 5 is set.
      */
-    boolean isPrimitive;
+    public boolean isPrimitive;
     /**
      * The value of firstTagByte can be used to retrieve class information.
      *

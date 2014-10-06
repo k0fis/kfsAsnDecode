@@ -1,5 +1,7 @@
 package kfs.kfsAsnDecode;
 
+import kfs.kfsAsnDecode.utils.Util;
+
 /**
  * Models a primitive type data.
  *

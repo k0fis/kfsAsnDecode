@@ -1,5 +1,6 @@
 package kfs.kfsAsnDecode;
 
+import kfs.kfsAsnDecode.utils.Util;
 import java.util.Map;
 
 /**
@@ -97,7 +98,7 @@ public class ASNClass {
     /**
      * @return The name of ASN Primitive class if the class is a primitive, else returns null;
      */
-    String getPrimitiveName() {
+    public String getPrimitiveName() {
         return isPrimitive;
     }
 
@@ -158,6 +159,10 @@ public class ASNClass {
      */
     public boolean isAssociatedWithTag() {
         return (associatedTag != NO_ASSOCIATED_TAG);
+    }
+    
+    public boolean isEnumerated() {
+        return associatedTag == ASNConst.TAG_ENUMERATED;
     }
 
     /**
@@ -322,4 +327,4 @@ public class ASNClass {
     Field getArrayFieldWithPos(int pos) {
         return null;
     }
-} // ==================== END OF ASNClass =================================
+} 

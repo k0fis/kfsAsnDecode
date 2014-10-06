@@ -1,5 +1,7 @@
 package kfs.kfsAsnDecode;
 
+import kfs.kfsAsnDecode.utils.Util;
+
 public class Field {
 
     public final static String ROOTFIELD = "root";
