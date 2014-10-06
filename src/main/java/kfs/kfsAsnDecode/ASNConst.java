@@ -73,4 +73,37 @@ public class ASNConst {
         return primitiveMap;
     }
     private static Map<String, Integer> primitiveMap;
+    private static Map<String, Class<?>> primitiveClassMap;
+
+    public static Map<String, Class<?>> getPrimitiveClassMap() {
+        if (primitiveClassMap == null) {
+            primitiveClassMap = new HashMap<String, Class<?>>();
+            primitiveClassMap.put("BOOLEAN", Boolean.class);
+            primitiveClassMap.put("INTEGER", Integer.class);
+            primitiveClassMap.put("BIT STRING", String.class);
+            primitiveClassMap.put("OCTET STRING", String.class);
+            primitiveClassMap.put("NULL", Integer.class);
+            primitiveClassMap.put("OBJECT IDENTIFIER", String.class);
+            primitiveClassMap.put("DOUBLE", Double.class);
+            primitiveClassMap.put("ENUMERATED", Integer.class);
+            primitiveClassMap.put("NumericString", String.class);
+            primitiveClassMap.put("PrintableString", String.class);
+            primitiveClassMap.put("TeletexString", String.class);
+            primitiveClassMap.put("VideotexString", String.class);
+            primitiveClassMap.put("IA5String", String.class);
+            primitiveClassMap.put("GraphicString", String.class);
+            primitiveClassMap.put("VisibleString", String.class);
+            primitiveClassMap.put("GraphicString2", String.class);
+        }
+        return primitiveClassMap;
+    }
+
+    public static Class<?> getPrimitiveClass(String str) {
+        Class<?> cls = getPrimitiveClassMap().get(str);
+        if (cls == null) {
+            return String.class;
+        }
+        return cls;
+    }
+
 }
