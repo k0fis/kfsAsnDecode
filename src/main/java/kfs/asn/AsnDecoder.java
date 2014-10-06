@@ -1,4 +1,4 @@
-package kfs.kfsAsnDecode.utils;
+package kfs.asn;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,24 +10,24 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import kfs.kfsAsnDecode.ASNClassFactory;
-import kfs.kfsAsnDecode.ASNConst;
-import kfs.kfsAsnDecode.ASNException;
-import kfs.kfsAsnDecode.EBlock;
-import kfs.kfsAsnDecode.Field;
-import kfs.kfsAsnDecode.kfsGramarFile;
+import kfs.asn.utils.AsnConst;
+import kfs.asn.utils.ASNException;
+import kfs.asn.utils.ASNClassFactory;
+import kfs.asn.utils.EBlock;
+import kfs.asn.utils.Field;
+import kfs.asn.utils.GramarFile;
 import org.apache.log4j.Logger;
 
-public class AsnNodeFactory {
+public class AsnDecoder {
 
     private final Map<String, Class> nodeMap;
 
-    public AsnNodeFactory(Map<String, Class> nodeClsMap) {
+    public AsnDecoder(Map<String, Class> nodeClsMap) {
         this.nodeMap = nodeClsMap;
     }
 
-    public Object parse(InputStream dataFile, kfsGramarFile grammarFile) throws IOException {
-        Field rootField = ASNClassFactory.getField(grammarFile);
+    public Object parse(InputStream dataFile, GramarFile grammarFile) throws IOException {
+        Field rootField = new ASNClassFactory(grammarFile).getField();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         while (true) {
@@ -50,7 +50,7 @@ public class AsnNodeFactory {
     private Object makeNode(Field asnField, EBlock b, int maxBlocks, int depth) {
         try {
             if (b.isLeaf()) {
-                Integer tag = ASNConst.getPrimitiveMap().get(asnField.type.name);
+                Integer tag = AsnConst.getPrimitiveMap().get(asnField.type.name);
                 if (tag == null) {
                     return new AsnData(0, b.getValue());
                 } else {
@@ -75,8 +75,8 @@ public class AsnNodeFactory {
                 Class type = AsnData.class;
                 setMethod = getMethod(cls, setMethodName, type);
                 if (setMethod == null) {
-                    if (ASNConst.isPrimitive(asnDef.asnType())) {
-                        type = ASNConst.getPrimitiveClass(asnDef.asnType());
+                    if (AsnConst.isPrimitive(asnDef.asnType())) {
+                        type = AsnConst.getPrimitiveClass(asnDef.asnType());
                     } else {
                         type = field.getType();
                     }
@@ -115,7 +115,7 @@ public class AsnNodeFactory {
                 } else { // -- composite | not array | choice
                     String str = "Unable to find child field or grandchild field for given tag. subBlock.tag("
                             + sbpos + ") field(" + asnField + ")";
-                    Logger.getLogger(AsnNodeFactory.class).fatal(str);
+                    Logger.getLogger(AsnDecoder.class).fatal(str);
                 }
             }
             return obj;
@@ -190,7 +190,7 @@ public class AsnNodeFactory {
                     Object refChildNode = makeNode(refChildField, subBlock, maxBlocks, depth + 1);
                     if (refChildNode != null) {
                         if (refChildNode instanceof AsnData) {
-                            list.add(((AsnData) refChildNode).getData(ASNConst.getPrimitiveClass(refChildField.type.name)));
+                            list.add(((AsnData) refChildNode).getData(AsnConst.getPrimitiveClass(refChildField.type.name)));
                         } else {
                             list.add(refChildNode);
                         }
@@ -204,7 +204,7 @@ public class AsnNodeFactory {
                 Object node = makeNode(f_nav, subBlock, maxBlocks, depth + 1);
                 if (node != null) {
                     if (node instanceof AsnData) {
-                        list.add(((AsnData) node).getData(ASNConst.getPrimitiveClass(f_nav.type.name)));
+                        list.add(((AsnData) node).getData(AsnConst.getPrimitiveClass(f_nav.type.name)));
                     } else {
                         list.add(node);
                     }

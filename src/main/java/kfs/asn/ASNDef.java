@@ -1,4 +1,4 @@
-package kfs.kfsAsnDecode.utils;
+package kfs.asn;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,7 +10,15 @@ import java.lang.annotation.Target;
  * @author pavedrim
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface ASNCls {
-    String value();
+@Target(ElementType.FIELD)
+public @interface ASNDef {
+
+    int asnPos();
+    
+    String asnName();
+
+    String label() default "";
+    
+    String asnType() default "";
+
 }

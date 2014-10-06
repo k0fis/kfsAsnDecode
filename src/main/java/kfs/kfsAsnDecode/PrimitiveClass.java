@@ -1,6 +1,5 @@
 package kfs.kfsAsnDecode;
 
-import kfs.kfsAsnDecode.utils.Util;
 
 /**
  * Models a primitive type data.
@@ -71,7 +70,7 @@ public class PrimitiveClass {
                 s = s + (stringValue == null ? "UNKNOWN" : stringValue);
                 break;
             case BYTEARRAY:
-                s = s + Util.byteArrayToIA5String(Util.nibbleSwap(byteArray));
+                s = s + AsnUtil.byteArrayToIA5String(AsnUtil.nibbleSwap(byteArray));
                 break;
         }
         return s;

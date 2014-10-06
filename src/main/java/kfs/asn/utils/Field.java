@@ -1,4 +1,5 @@
-package kfs.kfsAsnDecode;
+package kfs.asn.utils;
+
 
 
 public class Field {
@@ -85,7 +86,7 @@ public class Field {
      */
     public String toConciseString() {
 
-        String posStr = pos == ASNConst.POS_NOT_SPECIFIED ? "NO_POS" : ("" + pos);
+        String posStr = pos == AsnConst.POS_NOT_SPECIFIED ? "NO_POS" : ("" + pos);
         String ret = "Field [ " + longName + "(" + posStr + ") " + type.getName();
         if (type.isAssociatedWithTag()) {
             ret = ret + " p(" + type.getAssociatedTag() + ")";
@@ -104,18 +105,10 @@ public class Field {
 
     public static String getCapitalize(String inp) {
         return inp.substring(0, 1).toUpperCase() + inp.substring(1);
-    }
-    public void getSubNames(String prefix, int ppr, kfsCreateClass nLst) {
-        if (ASNConst.isPrimitive(type.name)) {
-            nLst.add(prefix+getCapitalize(name), ppr+pos);
-        } else {
-            type.getSubNames(prefix+getCapitalize(name), (pos*1000)+ppr, nLst);
-        }        
-    }
-    
+    }    
     public String toStringTree(int depth) {
         String ret = "";
-        if (ASNConst.isPrimitive(type.name)) {
+        if (AsnConst.isPrimitive(type.name)) {
             ret += "\n" + AsnUtil.getSpace(depth) + type.getName() + " " + name + /*" " + longName +*/ " [" + pos + "] ";
         } else {
             ret += "\n" + AsnUtil.getSpace(depth) + type.toStringTree(depth) + " " + name + /*" " + longName + */" [" + pos + "] ";
@@ -174,7 +167,7 @@ public class Field {
 
         for (int i = 0; i < type.fields.length; i++) {
             Field subField = type.fields[i];
-            if (subField.pos != ASNConst.POS_NOT_SPECIFIED) {
+            if (subField.pos != AsnConst.POS_NOT_SPECIFIED) {
                 if (type.fields[i].pos == sbpos) {
                     return subField;
                 }
@@ -240,7 +233,7 @@ public class Field {
 
         for (int i = 0; i < type.fields.length; i++) {
             Field subField = type.fields[i];
-            if (subField.isArray() && subField.pos == ASNConst.POS_NOT_SPECIFIED) {
+            if (subField.isArray() && subField.pos == AsnConst.POS_NOT_SPECIFIED) {
                 return subField;
             }
         }

@@ -1,39 +1,40 @@
-package kfs.kfsAsnDecode.utils;
+package kfs.asn;
 
+import kfs.asn.utils.AsnConst;
+import kfs.asn.utils.AsnUtil;
+import kfs.asn.utils.ASNClass;
+import kfs.asn.utils.ASNClassFactory;
+import kfs.asn.utils.Field;
+import kfs.asn.utils.GramarFile;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
-import kfs.kfsAsnDecode.ASNClass;
-import kfs.kfsAsnDecode.ASNClassFactory;
-import kfs.kfsAsnDecode.ASNConst;
-import kfs.kfsAsnDecode.Field;
-import kfs.kfsAsnDecode.kfsGramarFile;
 
 /**
  *
  * @author pavedrim
  */
-public class GenerateClasses {
+public class AsnGenerateClasses {
 
     private final String asnName;
     private final String className;
     private final String javaName;
     private final String humanName;
     private final String dbName;
-    private final ArrayList<GenerateClasses> classes;
+    private final ArrayList<AsnGenerateClasses> classes;
     private final StringBuilder output;
 
-    public GenerateClasses(String packageName, ASNClass cls/*, kfsCreatePojoClass master*/) {
-        this.classes = new ArrayList<GenerateClasses>();
+    public AsnGenerateClasses(String packageName, ASNClass cls/*, kfsCreatePojoClass master*/) {
+        this.classes = new ArrayList<AsnGenerateClasses>();
         this.asnName = cls.name;
-        String[] names = Util.getNamesFromJavaName(asnName);
-        this.humanName = Util.getHumanName(names).toString();
-        this.dbName = Util.getDbName(names).toString();
-        this.className = Util.getHumanName(names, "").toString();
-        this.javaName = Util.getJavaName(names).toString();
+        String[] names = AsnUtil.getNamesFromJavaName(asnName);
+        this.humanName = AsnUtil.getHumanName(names).toString();
+        this.dbName = AsnUtil.getDbName(names).toString();
+        this.className = AsnUtil.getHumanName(names, "").toString();
+        this.javaName = AsnUtil.getJavaName(names).toString();
 
         output = new StringBuilder().append(getClassString(packageName, cls/*, master*/));
     }
@@ -44,15 +45,14 @@ public class GenerateClasses {
         sb.append("package ").append(packageName).append(";\n\n");
         sb.append("import java.util.Arrays;\n");
         sb.append("import java.util.List;\n");
-        sb.append("import kfs.kfsAsnDecode.utils.ASNCls;\n");
-        sb.append("import kfs.kfsAsnDecode.utils.ASNDef;\n");
-        sb.append("import kfs.kfsAsnDecode.utils.AsnData;\n");
+        sb.append("import kfs.asn.ASNCls;\n");
+        sb.append("import kfs.asn.ASNDef;\n");
+        sb.append("import kfs.asn.AsnData;\n");
         sb.append("import javax.persistence.GeneratedValue;\n");
         sb.append("import javax.persistence.GenerationType;\n");
         sb.append("import javax.persistence.Id;\n");
         sb.append("import javax.persistence.Column;\n");
         sb.append("import javax.persistence.OneToMany;\n");
-        //sb.append("import javax.persistence.ManyToOne;\n");
         sb.append("\n/**\n *\n * @author Kofis\n */\n");
         sb.append("@ASNCls(\"").append(cls.name).append("\")\n");
         sb.append("public class ").append(className).append(" {\n\n");
@@ -78,22 +78,22 @@ public class GenerateClasses {
 
         if (cls.fields != null) {
             for (Field field : cls.fields) {
-                String[] names = Util.getNamesFromJavaName(field.name);
-                String javaVarName = Util.getJavaName(names).toString();
+                String[] names = AsnUtil.getNamesFromJavaName(field.name);
+                String javaVarName = AsnUtil.getJavaName(names).toString();
                 String sgName = javaVarName.substring(0, 1).toUpperCase() + javaVarName.substring(1);
                 maxJavaNameLength = Math.max(maxJavaNameLength, javaVarName.length());
                 sb.append("    @ASNDef(asnPos = ").append(field.pos).append(", asnName = \"")//
-                        .append(field.name).append("\", label=\"").append(Util.getHumanName(names))//
+                        .append(field.name).append("\", label=\"").append(AsnUtil.getHumanName(names))//
                         .append("\", asnType = \"").append(field.type.name).append("\" )\n");
-                if (ASNConst.isPrimitive(field.type.name)) {
+                if (AsnConst.isPrimitive(field.type.name)) {
                     if ("servingNodeType".equals(field.name)) {
                         System.out.println(field.toConciseString() + " " + field.type.isSequence());
                     }
-                    Class varCls = ASNConst.getPrimitiveClass(field.type.name);
+                    Class varCls = AsnConst.getPrimitiveClass(field.type.name);
                     if (String.class.equals(varCls)) {
-                        sb.append("    @Column(length = 50, name = \"").append(Util.getDbName(names)).append("\")\n");
+                        sb.append("    @Column(length = 50, name = \"").append(AsnUtil.getDbName(names)).append("\")\n");
                     } else {
-                        sb.append("    @Column(name = \"").append(Util.getDbName(names)).append("\")\n");
+                        sb.append("    @Column(name = \"").append(AsnUtil.getDbName(names)).append("\")\n");
                     }
                     sb.append("    private ").append(varCls.getSimpleName())//
                             .append(" ").append(javaVarName).append(";\n\n");
@@ -101,7 +101,7 @@ public class GenerateClasses {
                     sg.append(getGetterSetter(varCls.getSimpleName(), sgName, javaVarName));
 
                 } else {
-                    GenerateClasses inCls = new GenerateClasses(packageName, field.type);
+                    AsnGenerateClasses inCls = new AsnGenerateClasses(packageName, field.type);
                     sb.append("    @OneToMany\n");
                     if (field.isArray() || field.type.isSet() || field.type.isSequence()) {
                         sb.append("    private List<").append(inCls.className).append("> ").append(javaVarName).append(";\n\n");
@@ -122,9 +122,9 @@ public class GenerateClasses {
 
         if (cls.fields != null) {
             for (Field field : cls.fields) {
-                String[] names = Util.getNamesFromJavaName(field.name);
-                String javaVarName = Util.getJavaName(names).toString();
-                if (ASNConst.isPrimitive(field.type.name) || (!field.isArray() && !field.type.isSet() && !field.type.isSequence())) {
+                String[] names = AsnUtil.getNamesFromJavaName(field.name);
+                String javaVarName = AsnUtil.getJavaName(names).toString();
+                if (AsnConst.isPrimitive(field.type.name) || (!field.isArray() && !field.type.isSet() && !field.type.isSequence())) {
                     sb.append("        sb.append(\"  ").append(javaVarName)//
                             .append(new String(new char[maxJavaNameLength - javaVarName.length() + 1]).replace("\0", " "))//
                             .append(" = \").append(").append(javaVarName).append(").append(\"\\n\");\n");
@@ -154,17 +154,20 @@ public class GenerateClasses {
                 .append(javaVarName).append(" ) { \n")//
                 .append("        this.").append(javaVarName).append(" = ")//
                 .append(javaVarName).append(";\n")//
-                .append("    }\n\n")
-                .append("    //public void set"+sgName+"(AsnData "+javaVarName+" ) { \n"
-                        + "  //      this."+javaVarName+" = "+javaVarName+".getByteArray().toString();\n"
+                .append("    }\n\n")//
+                .append("    //public void set").append(sgName)//
+                .append("(AsnData ").append(javaVarName).append(" ) { \n" + "  //      this.")//
+                .append(javaVarName).append(" = ")//
+                .append(javaVarName)
+                .append(".getByteArray().toString();\n"
                         + "  //  }\n\n");
     }
-    
-    public static void save(String dir, String packageName, kfsGramarFile gramar) throws IOException {
-        Field ff = ASNClassFactory.getField(gramar);
 
-        GenerateClasses cc = new GenerateClasses(packageName, ff.type);
-        ArrayDeque<GenerateClasses> al = new ArrayDeque<GenerateClasses>();
+    public static void save(String dir, String packageName, GramarFile gramar) throws IOException {
+        Field ff = new ASNClassFactory(gramar).getField();
+
+        AsnGenerateClasses cc = new AsnGenerateClasses(packageName, ff.type);
+        ArrayDeque<AsnGenerateClasses> al = new ArrayDeque<AsnGenerateClasses>();
         al.add(cc);
         while (!al.isEmpty()) {
             cc = al.pop();
@@ -202,7 +205,7 @@ public class GenerateClasses {
         return dbName;
     }
 
-    public List<GenerateClasses> innerClasses() {
+    public List<AsnGenerateClasses> innerClasses() {
         return classes;
     }
 

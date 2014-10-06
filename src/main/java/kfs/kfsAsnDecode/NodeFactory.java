@@ -1,6 +1,5 @@
 package kfs.kfsAsnDecode;
 
-import kfs.kfsAsnDecode.utils.Util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +24,7 @@ public class NodeFactory {
 
     public static Node parse(String dataFile, kfsGramarFile grammarFile, kfsNodeCallBack cb) {
         Field rootField = ASNClassFactory.getField(grammarFile);
-        byte[] byteArr = Util.FileToByteArray(dataFile);
+        byte[] byteArr = AsnUtil.FileToByteArray(dataFile);
         EBlock rootBlock = new EBlock(0, 0, byteArr, 0, 0, byteArr.length);
 
         Node topNode = NodeFactory.makeNode(rootField, rootBlock, -1, 0, cb);
@@ -70,7 +69,7 @@ public class NodeFactory {
      * Creates a int from a Block
      */
     static int makeInteger(EBlock b) {
-        return Util.byteArrayToInt(b.fileBytes, b.valStart, b.valEnd);
+        return AsnUtil.byteArrayToInt(b.fileBytes, b.valStart, b.valEnd);
     }
 
     /**

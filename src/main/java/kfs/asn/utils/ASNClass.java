@@ -1,4 +1,4 @@
-package kfs.kfsAsnDecode;
+package kfs.asn.utils;
 
 import java.util.Map;
 
@@ -46,11 +46,11 @@ public class ASNClass {
     String relation;
 
     public boolean isSequence() {
-        return !isArray() && relation.equals(ASNConst.RELATION_SEQUENCE);
+        return !isArray() && relation.equals(AsnConst.RELATION_SEQUENCE);
     }
 
     public boolean isSet() {
-        return !isArray() && relation.equals(ASNConst.RELATION_SET);
+        return !isArray() && relation.equals(AsnConst.RELATION_SET);
     }
     /**
      * Contains Array information for this ASNClass
@@ -67,7 +67,7 @@ public class ASNClass {
      *
      */
     public boolean isReference() {
-        return (relation != null && relation.equals(ASNConst.RELATION_CHOICE));
+        return (relation != null && relation.equals(AsnConst.RELATION_CHOICE));
     }
     /**
      * If isPrimitive, it contains the name of primitive ASNClass Primitive Class else it is null.
@@ -161,7 +161,7 @@ public class ASNClass {
     }
     
     public boolean isEnumerated() {
-        return associatedTag == ASNConst.TAG_ENUMERATED;
+        return associatedTag == AsnConst.TAG_ENUMERATED;
     }
 
     /**
@@ -174,7 +174,7 @@ public class ASNClass {
 
         if (isAssociatedWithTag()) {
             if (isPrimitive != null) {
-                Map<String, Integer> map = ASNConst.getPrimitiveMap();
+                Map<String, Integer> map = AsnConst.getPrimitiveMap();
                 retTag = map.get(name);
             } else {
                 retTag = associatedTag;
@@ -212,13 +212,7 @@ public class ASNClass {
         }
         return ret;
     }
-    public void getSubNames(String prefix, int ppr, kfsCreateClass nLst) {
-        if (fields != null) {
-            for (Field f : fields) {
-                f.getSubNames(prefix, ppr, nLst);
-            }
-        }       
-    }
+ 
     public String toStringTree(int depth) { // For ASNClass
         String ret = "";
         int numChildren = 0;

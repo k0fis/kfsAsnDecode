@@ -1,8 +1,8 @@
-package kfs.kfsAsnDecode.utils;
+package kfs.asn;
 
-import java.util.Arrays;
-import kfs.kfsAsnDecode.ASNConst;
-import org.apache.log4j.Logger;
+import kfs.asn.utils.AsnConst;
+import kfs.asn.utils.AsnUtil;
+import kfs.asn.utils.ASNException;
 
 /**
  *
@@ -27,18 +27,18 @@ public class AsnData {
     }
 
     public String getStringValue() {
-        return Util.bytesToHex(byteArray).toString();
+        return AsnUtil.bytesToHex(byteArray).toString();
     }
 
     public int getIntValue() {
-        return Util.byteArrayToInt(byteArray);
+        return AsnUtil.byteArrayToInt(byteArray);
     }
 
     public Boolean getBoolValue() {
-        if (asnTag == ASNConst.TAG_BOOLEAN) {
+        if (asnTag == AsnConst.TAG_BOOLEAN) {
             return byteArray[0] != 0;
         }
-        Logger.getLogger(AsnData.class).info("Boolean with values: " + getStringValue());
+        //Logger.getLogger(AsnData.class).info("Boolean with values: " + getStringValue());
         return true;
     }
 
@@ -52,7 +52,6 @@ public class AsnData {
         if (Boolean.class.equals(obj) || boolean.class.equals(obj)) {
             return getBoolValue();
         }
-        Logger.getLogger(AsnData.class).info("GetData with for class: " + obj.getSimpleName());
-        return null;
+        throw new ASNException(null, "Cannot get data from class: " + obj.getSimpleName());
     }
 }

@@ -1,4 +1,4 @@
-package kfs.kfsAsnDecode;
+package kfs.asn.utils;
 
 import java.io.InputStream;
 
@@ -6,22 +6,22 @@ import java.io.InputStream;
  *
  * @author pavedrim
  */
-public class kfsGramarFile {
+public class GramarFile {
 
     public final String filename;
     public final String []lines;
     
-    public kfsGramarFile(String filename, String []lines) {
+    public GramarFile(String filename, String []lines) {
         this.filename = filename;
         this.lines = lines;
     }
     
-    public kfsGramarFile(String filename) {
+    public GramarFile(String filename) {
         this.filename = filename;
         this.lines = AsnUtil.toStringArray(filename);
     }
 
-    public kfsGramarFile(String filename, InputStream inpuStream) {
+    public GramarFile(String filename, InputStream inpuStream) {
         this.filename = filename;
         this.lines = AsnUtil.toStringArray(inpuStream);
     }

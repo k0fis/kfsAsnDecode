@@ -1,4 +1,4 @@
-package kfs.kfsAsnDecode;
+package kfs.asn.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,79 +12,54 @@ import java.util.regex.Pattern;
  */
 public class RawClassFactory {
 
-    /**
-     * Returns the root ASN Class name in a grammar file. caches Grammar file in memory.
-     *
-     * @param fileName - Name of ASN Grammar file.
-     * @return - Name of the root ASN Class inside 'fileName'
-     */
-    public static String getRootClassName(kfsGramarFile fileName) {
+    private final String rootClassName;
+    private final Map<String, RawClass> mapRawClass;
+    
+    public RawClassFactory(GramarFile fileName) {
+        this.mapRawClass = new HashMap<String, RawClass>();
 
-        if (!mapOfFileNameRawClass.containsKey(fileName.filename)) {
-            loadGrammarFile(fileName);
+        String[] convStr = convertStr(fileName.lines);
+        if (convStr == null) {
+           throw new ASNException("ASN Grammar File(" + fileName.filename + //
+                   ") does not contain any module.");
         }
 
-        String rootClassName = null;
-        if (mapOfFileNameRootClass.containsKey(fileName.filename)) {
-            rootClassName = mapOfFileNameRootClass.get(fileName.filename);
+        String rootClassName0 = null;
+        for (int i = 0; i < convStr.length; i++) {
+            RawClass rawclass = stringToRawClass(convStr[i]);
+            if (i == 0) { // Assuming the first Raw Class is the root Class
+                rootClassName0 = rawclass.className;
+            }
+            mapRawClass.put(rawclass.className, rawclass);
         }
+        rootClassName = rootClassName0;       
+    }
+    
+    public String getRootClassName() {
         return rootClassName;
     }
 
     /**
      * Caches Grammar file in memory.
      *
-     * @param fileName - ASNGrammar File containing 'className'
      * @param className - The ASN class whose RawClass object is required.
      * @return RawClass object corresponding to input parameters.
      * @throws ASNException if ASN Class is not present in fileName.
      *
      */
     @SuppressWarnings({"unchecked"})
-    public static RawClass getRawClass(kfsGramarFile fileName, String className) {
-        if (ASNConst.isPrimitive(className)) {
+    public RawClass getRawClass(String className) {
+        if (AsnConst.isPrimitive(className)) {
             RawClass ret = new RawClass();
             ret.className = className;
             return ret;
         }
 
-        if (!mapOfFileNameRawClass.containsKey(fileName.filename)) {
-            loadGrammarFile(fileName);
-        }
-
-        Map<String, RawClass> mapRawClass = (Map<String, RawClass>) mapOfFileNameRawClass.get(fileName.filename);
-
         if (mapRawClass.containsKey(className)) {
             return mapRawClass.get(className);
         } else {
-            throw new ASNException("There is no RawClass(" + className + ") in file(" + fileName + ")");
+            throw new ASNException("There is no RawClass(" + className + ")");
         }
-    }
-
-    /**
-     * Loads Grammar file. Assumes Grammar file was not cached and caches it. Not to be called
-     * directly. Is used internally by caching methods.
-     *
-     * @param fileName - ASN Grammar file to be loaded
-     */
-    private static void loadGrammarFile(kfsGramarFile fileName) {
-        Map<String, RawClass> mapRawClass;
-        mapRawClass = new HashMap<String, RawClass>();
-
-        String[] convStr = convertStr(fileName.lines);
-        if (convStr == null) {
-           throw new ASNException("ASN Grammar File(" + fileName.filename +//
-                   ") does not contain any module.");
-        }
-
-        for (int i = 0; i < convStr.length; i++) {
-            RawClass rawclass = stringToRawClass(convStr[i], fileName);
-            if (i == 0) { // Assuming the first Raw Class is the root Class
-                mapOfFileNameRootClass.put(fileName.filename, rawclass.className);
-            }
-            mapRawClass.put(rawclass.className, rawclass);
-        }
-        mapOfFileNameRawClass.put(fileName.filename, mapRawClass);
     }
 
     /**
@@ -96,7 +71,7 @@ public class RawClassFactory {
      * required to build a RawClass is present in the String.
      * @throws ASNException if unable to parse the input parameter 'arr'
      */
-    static String[] convertStr(String[] arr) {
+    private static String[] convertStr(String[] arr) {
         int beginPos = -1;
         int endPos = -1;
 
@@ -156,7 +131,7 @@ public class RawClassFactory {
      * @return If 's' contains a comment then the comment is removed and returned, if no comments
      * returns s
      */
-    static String filterComments(String s) {
+    private static String filterComments(String s) {
         if (s.contains("--")) {
             int pos = s.indexOf("--");
             return s.substring(0, pos);
@@ -170,7 +145,7 @@ public class RawClassFactory {
      * @param s - The String to be check for ASN Class declaration.
      * @return true if s starts with <word> ::=
      */
-    static boolean isClassDefination(String s) {
+    private static boolean isClassDefination(String s) {
         String hword = "((\\w|\\-)*)";                       // 2 Groups		
         String regEx = hword + "\\s*" + "::=" + ".*";
         Pattern pattern = Pattern.compile(regEx);
@@ -196,7 +171,7 @@ public class RawClassFactory {
      * multi-Liner First Line
      *
      */
-    static String[] splitString(String s) {
+    private static String[] splitString(String s) {
         int p1 = s.indexOf("{");
         int p2 = s.indexOf("}");
 
@@ -220,7 +195,7 @@ public class RawClassFactory {
      * @param fileName - Name of the file in which RawClass String is present
      * @return - RawClass object corresponding to input RawClass String
      */
-    static RawClass stringToRawClass(String s, kfsGramarFile fileName) {
+    private RawClass stringToRawClass(String s) {
 
         if (s == null) {
             throw new ASNException("Cannot convert null string to RawClass");
@@ -234,14 +209,14 @@ public class RawClassFactory {
 
         RawClass ret = new RawClass();
         ret.lineNumber = Integer.parseInt(lineNo);
-        ret.fileName = fileName;
         ret.singleLiner = !s.contains("{");
 
         if (ret.singleLiner) {
             Matcher matchResultSL = singleLinerPattern.matcher(s);
 
             if (!matchResultSL.matches()) {
-                String err = "Error Parsing File(" + ret.fileName + ") Line(" + ret.lineNumber + ") Format of String(" + s + ") is as per Single Liner Class declaration.";
+                String err = "Error Parsing on Line(" + ret.lineNumber + ") Format of String(" + s 
+                        + ") is as per Single Liner Class declaration.";
                 throw new ASNException(err);
             }
 
@@ -249,12 +224,14 @@ public class RawClassFactory {
             if (!classNameMissing) {
                 ret.className = matchResultSL.group(sName).trim();
                 classNameMissing = ret.className.equals("");
-                if (ASNConst.isPrimitive(ret.className)) {
+                if (AsnConst.isPrimitive(ret.className)) {
                     return ret;
                 }
             }
             if (classNameMissing) {
-                throw new ASNException("Error Parsing File(" + ret.fileName + ") Line(" + ret.lineNumber + ") Missing ClassName in String(" + s + ") describing a Single Line Class declaration");
+                throw new ASNException("Error Parsing on Line(" + ret.lineNumber + 
+                        ") Missing ClassName in String(" + s +
+                        ") describing a Single Line Class declaration");
             }
 
             if (matchResultSL.group(sRelation) != null) {
@@ -269,13 +246,16 @@ public class RawClassFactory {
                 typeMissing = ret.synonymn.equals("");
             }
             if (typeMissing) {
-                throw new ASNException("Error Parsing File(" + ret.fileName + ") Line(" + ret.lineNumber + ") Missing Synonymn in String(" + s + ") describing a Single Line Class declaration");
+                throw new ASNException("Error Parsing on Line(" + ret.lineNumber + 
+                        ") Missing Synonymn in String(" + s + 
+                        ") describing a Single Line Class declaration");
             }
         } else { // ret.MultiLiner =============================================			
 
             String[] splitStr = splitString(s);
             if (splitStr == null) {
-                throw new ASNException("Error Parsing File(" + ret.fileName + ") Line(" + ret.lineNumber + ") String(" + s + ") describing MultiLiner Class declaration. Check Missing Braces {}");
+                throw new ASNException("Error Parsing on Line(" + ret.lineNumber + ") String(" + 
+                        s + ") describing MultiLiner Class declaration. Check Missing Braces {}");
             }
             String mlfl = splitStr[0].trim();
             String mlcontents = splitStr[1].trim();
@@ -284,7 +264,8 @@ public class RawClassFactory {
             Matcher matchResultMLFL = multiLinerFirstLinePattern.matcher(mlfl);
 
             if (!matchResultMLFL.matches()) {
-                String err = "Error Parsing File(" + ret.fileName + ") Line(" + ret.lineNumber + ") Format of String(" + mlfl + ") is as per syntax of First Line MultiLiner Class declaration.";
+                String err = "Error Parsing on Line(" + ret.lineNumber + ") Format of String(" + 
+                        mlfl + ") is as per syntax of First Line MultiLiner Class declaration.";
                 throw new ASNException(err);
             }
 
@@ -292,12 +273,14 @@ public class RawClassFactory {
             if (!classNameMissing) {
                 ret.className = matchResultMLFL.group(sName).trim();
                 classNameMissing = ret.className.equals("");
-                if (ASNConst.isPrimitive(ret.className)) {
+                if (AsnConst.isPrimitive(ret.className)) {
                     return ret;
                 }
             }
             if (classNameMissing) {
-                throw new ASNException("Error Parsing File(" + ret.fileName + ") Line(" + ret.lineNumber + ") Missing ClassName in String(" + s + ") describing a First Line of MultiLiner Class declaration");
+                throw new ASNException("Error Parsing on Line(" + ret.lineNumber + 
+                        ") Missing ClassName in String(" + s + 
+                        ") describing a First Line of MultiLiner Class declaration");
             }
 
             if (matchResultMLFL.group(sPos) != null) {
@@ -314,7 +297,9 @@ public class RawClassFactory {
             if (matchResultMLFL.group(sType) != null) {
                 ret.synonymn = matchResultMLFL.group(sType).trim();
             } else {
-                throw new ASNException("Error Parsing File(" + ret.fileName + ") Line(" + ret.lineNumber + ") Missing ClassName in String(" + mlfl + ") describing First Line of MultiLiner Class declaration.");
+                throw new ASNException("Error Parsing on Line(" + ret.lineNumber + 
+                        ") Missing ClassName in String(" + mlfl + 
+                        ") describing First Line of MultiLiner Class declaration.");
             }
 
             if (!ret.singleLiner && (ret.synonymn.equals("ENUMERATED")
@@ -336,10 +321,6 @@ public class RawClassFactory {
                 Matcher matchResult = multiLinerChildPattern.matcher(curLine);
                 if (matchResult.matches()) {
                     //System.out.printf("\n children matches %d",i);
-                    boolean hasPos = false;
-                    boolean hasTag = false;
-                    boolean hasArr = false;
-                    boolean hasSeq = false;
                     String fieldName = matchResult.group(gName).trim();
                     String fieldType = matchResult.group(gType).trim();
                     String relationStr = matchResult.group(gRelation);
@@ -377,11 +358,17 @@ public class RawClassFactory {
                     tmpisArr.add(fieldIsArray);
 
                     if (posvalue == -2 && !fieldType.equals("OBJECT IDENTIFIER") && !fieldIsArray.isArray()) {
-                        throw new ASNException("Error Parsing File(" + ret.fileName + ") Class(" + ret.className + ") at line (" + ret.lineNumber + ") FieldPos(" + i + ") Field(" + curLine + ") does not match syntax of Field in a MultiLiner Class declaration. Field Position is missing. ");
+                        throw new ASNException("Error Parsing in Class(" + ret.className + 
+                                ") at line (" + ret.lineNumber + ") FieldPos(" + i + ") Field(" + 
+                                curLine + ") does not match syntax of Field in a MultiLiner Class "
+                                + "declaration. Field Position is missing. ");
 
                     }
                 } else {
-                    throw new ASNException("Error Parsing File(" + ret.fileName + ") Class(" + ret.className + ") at line (" + ret.lineNumber + ") FieldPos(" + i + ") Field(" + curLine + ") does not match syntax of Field in a MultiLiner Class declaration");
+                    throw new ASNException("Error Parsing in Class(" + ret.className + 
+                            ") at line (" + ret.lineNumber + ") FieldPos(" + i + ") Field(" + 
+                            curLine + ") does not match syntax of Field in a MultiLiner Class "
+                            + "declaration");
                 }
             }
             ret.fields = new String[tmpFields.size()];
@@ -395,14 +382,7 @@ public class RawClassFactory {
         return ret;
     }
 
-    /**
-     * Returns the internal cache object stored by RawClass factory.
-     *
-     * @return
-     */
-    public Map<String, Object> getMapOfFileNameRawClass() {
-        return mapOfFileNameRawClass;
-    }
+
     // ====================================================================
     // Private members   
     // ====================================================================
@@ -418,8 +398,7 @@ public class RawClassFactory {
      * Is a map of String and Object where String is filename and where Object is
      * Map<RawClassName,RawClass>
      */
-    private static final Map<String, Object> mapOfFileNameRawClass = new HashMap<String, Object>();
-    private static final Map<String, String> mapOfFileNameRootClass = new HashMap<String, String>();
+    
     /**
      * Group Positions in MultiLinerChild RegEx
      */
