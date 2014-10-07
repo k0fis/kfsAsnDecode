@@ -148,7 +148,12 @@ public class AsnDecoder {
                 }
                 if (param != null) {
                     Method objMethod = objFieldMap.get(sbpos);
-                    setData(obj, objMethod, param);
+                    if (objMethod == null) {
+                        //throw new ASNException(null, "Cannot find set method for asn pos = " + sbpos + " in class " + cls.getSimpleName());
+                        Logger.getLogger(AsnDecoder.class).fatal("Cannot find set method for asn pos = " + sbpos + " in class " + cls.getSimpleName() + " tag: " + subBlock.tag);
+                    } else {
+                        setData(obj, objMethod, param);
+                    }
                 } else { // -- composite | not array | choice
                     String str = "Unable to find child field or grandchild field for given tag. subBlock.tag("
                             + sbpos + ") field(" + asnField + ")";
@@ -171,7 +176,11 @@ public class AsnDecoder {
 
     private static void setData(Object obj, Method objMethod, Object param) {
         try {
-            Class pt = objMethod.getParameterTypes()[0];
+            Class []ptt = objMethod.getParameterTypes();
+            if (ptt == null) {
+                throw new ASNException(null, "Cannot find parameters in method: " + objMethod.toGenericString());
+            }
+            Class pt = ptt[0];
             if (pt.isInstance(param)) {
                 objMethod.invoke(obj, param);
                 return;

@@ -126,9 +126,11 @@ public class AsnGenerateClasses {
                             .append(AsnUtil.getSpace(maxJavaNameLength - javaVarName.length() + 1," "))//
                             .append(" = \").append(").append(javaVarName).append(").append(\"\\n\");\n");
                 } else {
-                    sb.append("        sb.append(\"  ").append(javaVarName)//
+                    sb.append("        if (").append(javaVarName).append(" != null) {\n");
+                    sb.append("            sb.append(\"  ").append(javaVarName)//
                             .append(AsnUtil.getSpace(maxJavaNameLength - javaVarName.length() + 1, " "))//
                             .append(" = \").append(Arrays.deepToString(").append(javaVarName).append(".toArray())).append(\"\\n\");\n");
+                    sb.append("        }\n");
                 }
             }
         }
