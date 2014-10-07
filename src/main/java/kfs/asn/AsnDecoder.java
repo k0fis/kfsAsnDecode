@@ -21,9 +21,27 @@ import org.apache.log4j.Logger;
 public class AsnDecoder {
 
     private final Map<String, Class> nodeMap;
+    private final ArrayList<AsnNodeCallBack> asnNodeCallBackList;
 
     public AsnDecoder(Map<String, Class> nodeClsMap) {
         this.nodeMap = nodeClsMap;
+        asnNodeCallBackList = new ArrayList<AsnNodeCallBack>();
+    }
+
+    public void addAsnNodeCallBack(AsnNodeCallBack cb) {
+        asnNodeCallBackList.add(cb);
+    }
+
+    public void removeAsnNodeCallBack(AsnNodeCallBack cb) {
+        asnNodeCallBackList.remove(cb);
+    }
+
+    protected void fireCallBack(Object node) {
+        for (AsnNodeCallBack cb : asnNodeCallBackList) {
+            if (cb.acceptCls(node.getClass())) {
+                cb.kfsCb(node);
+            }
+        }
     }
 
     public Object parse(InputStream dataFile, GramarFile grammarFile) throws IOException {
@@ -69,18 +87,37 @@ public class AsnDecoder {
                 if (asnDef == null) {
                     continue;
                 }
-                Method setMethod;
+                Method setMethod = null;
                 String s = field.getName();
                 String setMethodName = "set" + s.substring(0, 1).toUpperCase() + s.substring(1);
-                Class type = AsnData.class;
-                setMethod = getMethod(cls, setMethodName, type);
+
+                Class type = List.class;
+                if (type.equals(field.getType())) {
+                    setMethod = getMethod(cls, setMethodName + "Asn", type);
+                }
+
+                if (setMethod == null) {
+                    type = AsnData.class;
+                    setMethod = getMethod(cls, setMethodName, type);
+                }
                 if (setMethod == null) {
                     if (AsnConst.isPrimitive(asnDef.asnType())) {
                         type = AsnConst.getPrimitiveClass(asnDef.asnType());
                     } else {
-                        type = field.getType();
+                        type = this.nodeMap.get(asnDef.asnType());
                     }
-                    setMethod = getMethod(cls, setMethodName, type);
+                    setMethod = getMethod(cls, setMethodName + "Asn", type);
+                    if (setMethod == null) {
+                        setMethod = getMethod(cls, setMethodName, type);
+                    }
+                    if (setMethod == null) {
+                        type = field.getType();
+                        setMethod = getMethod(cls, setMethodName + "Asn", type);
+                        if (setMethod == null) {
+                            setMethod = getMethod(cls, setMethodName, type);
+                        }
+                    }
+
                 }
                 if (setMethod == null) {
                     throw new ASNException("kfs", "Cannot find set method " + cls.getSimpleName()//
@@ -118,6 +155,7 @@ public class AsnDecoder {
                     Logger.getLogger(AsnDecoder.class).fatal(str);
                 }
             }
+            fireCallBack(obj);
             return obj;
         } catch (ASNException e) {
             // Catch Exception if thrown by recursive makeNode(), append stack Info and re throw. 

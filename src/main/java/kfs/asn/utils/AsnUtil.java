@@ -200,7 +200,7 @@ public class AsnUtil {
     public static String byteToHex(byte v) {
         return "" + hexArray[v >>> 4] + hexArray[v & 0x0F];
     }
-
+    
     public static CharSequence bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         int v;
@@ -227,4 +227,15 @@ public class AsnUtil {
         }
         return s;
     }
+    
+    /**
+     * Check bit part ant return boolean value for 1 true and zero for false
+     *
+     * @param bit - position of iteresting bit
+     * @param data - input data integer
+     * @return true for bit value 1 and false for bit value 0
+     */
+    public static boolean checkBit(int bit, int data) {
+        return ((data >> bit) & 1) == 1;
+    }    
 }

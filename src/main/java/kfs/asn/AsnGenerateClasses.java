@@ -44,6 +44,7 @@ public class AsnGenerateClasses {
         StringBuilder sg = new StringBuilder();
         StringBuilder cl = new StringBuilder();
         sb.append("package ").append(packageName).append(";\n\n");
+        sb.append("import java.util.ArrayList;\n");
         sb.append("import java.util.Arrays;\n");
         sb.append("import java.util.List;\n");
         sb.append("import kfs.asn.ASNCls;\n");
@@ -93,18 +94,18 @@ public class AsnGenerateClasses {
                     }
                     sb.append("    private ").append(varCls.getSimpleName())//
                             .append(" ").append(javaVarName).append(";\n\n");
-
-                    sg.append(getGetterSetter(varCls.getSimpleName(), sgName, javaVarName, true, false));
+                    
+                    sg.append(getGetterSetter(varCls.getSimpleName(), sgName, javaVarName, true, null));
 
                 } else {
                     AsnGenerateClasses inCls = new AsnGenerateClasses(packageName, field.type);
                     sb.append("    @OneToMany\n");
                     if (field.isArray() || field.type.isSet() || field.type.isSequence()) {
                         sb.append("    private List<").append(inCls.className).append("> ").append(javaVarName).append(";\n\n");
-                        sg.append(getGetterSetter("List<" + inCls.className + ">", sgName, javaVarName, false, true));
+                        sg.append(getGetterSetter("List<" + inCls.className + ">", sgName, javaVarName, false, inCls.className));
                     } else {
                         sb.append("    private ").append(inCls.className).append(" ").append(javaVarName).append(";\n\n");
-                        sg.append(getGetterSetter(inCls.className, sgName, javaVarName, false, false));
+                        sg.append(getGetterSetter(inCls.className, sgName, javaVarName, false, null));
                     }
                     classes.add(inCls);
 
@@ -139,7 +140,7 @@ public class AsnGenerateClasses {
         return sb;
     }
 
-    private CharSequence getGetterSetter(String className, String sgName, String javaVarName, boolean pri, boolean list) {
+    private CharSequence getGetterSetter(String className, String sgName, String javaVarName, boolean pri, String listInName) {
         StringBuilder sb = new StringBuilder()//
                 .append("    public ").append(className).append(" get")//
                 .append(sgName).append("() { \n")//
@@ -157,18 +158,18 @@ public class AsnGenerateClasses {
                     .append("//        this.").append(javaVarName).append(" = ").append(javaVarName).append(".getByteArray().toString();\n")
                     .append("//    }\n\n");
         }
-        if (list) {
+        if (listInName != null) {
             sb
-                    .append("    public void set").append(sgName).append("Asn (").append(className).append(" ").append(javaVarName).append(" ) { \n")
-                    .append("        ArrayList al = new ArrayList(").append(javaVarName).append(".size());\n")
-                    .append("        for (Object o : ").append(javaVarName).append(") {\n")
-                    .append("            if (o instanceof AsnData)\n")
+                    .append("//    public void set").append(sgName).append("Asn (").append(className).append(" ").append(javaVarName).append(" ) { \n")
+                    .append("//        ArrayList al = new ArrayList(").append(javaVarName).append(".size());\n")
+                    .append("//        for (Object o : ").append(javaVarName).append(") {\n")
+                    .append("//            if (o instanceof AsnData)\n")
                     .append("//                al.add(AsnUtil.getIp(((AsnData)o).getByteArray()));\n")
-                    .append("                al.add(((AsnData)o).getData(String.class));\n")
-                    .append("            else\n")
-                    .append("                System.err.println(o.getClass().getSimpleName());\n")
-                    .append("        }\n")
-                    .append("        this.").append(javaVarName).append(" = al;\n")
+                    .append("//                al.add(((AsnData)o).getData(").append(listInName).append(".class));\n")
+                    .append("//            else\n")
+                    .append("//                System.err.println(o.getClass().getSimpleName());\n")
+                    .append("//        }\n")
+                    .append("//        this.").append(javaVarName).append(" = al;\n")
                     .append("//    }\n\n");
         }
 
