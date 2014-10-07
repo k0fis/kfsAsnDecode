@@ -16,12 +16,12 @@ public class AsnUtil {
 
     
     public static String getSpace(int n) {
-        String ret = "";
-        for (int i = 0; i < n; i++) {
-            ret += "\t";
-        }
-        return ret;
+        return getSpace(n, "\t");
     }
+    public static String getSpace(int n, String space) {
+        return new String(new char[n]).replace("\0", space);
+    }
+    
     public static int[] toIntArray(ArrayList<Integer> arr) {
         int[] rarr = new int[arr.size()];
 

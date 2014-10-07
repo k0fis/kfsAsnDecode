@@ -189,11 +189,7 @@ public class AsnDecoder {
                 } else {
                     Object refChildNode = makeNode(refChildField, subBlock, maxBlocks, depth + 1);
                     if (refChildNode != null) {
-                        if (refChildNode instanceof AsnData) {
-                            list.add(((AsnData) refChildNode).getData(AsnConst.getPrimitiveClass(refChildField.type.name)));
-                        } else {
-                            list.add(refChildNode);
-                        }
+                        list.add(refChildNode);
                     }
                 }
             }
@@ -203,11 +199,7 @@ public class AsnDecoder {
             for (EBlock subBlock : subBlocks) {
                 Object node = makeNode(f_nav, subBlock, maxBlocks, depth + 1);
                 if (node != null) {
-                    if (node instanceof AsnData) {
-                        list.add(((AsnData) node).getData(AsnConst.getPrimitiveClass(f_nav.type.name)));
-                    } else {
-                        list.add(node);
-                    }
+                    list.add(node);
                 }
 
                 // ------------------Defensive Checks ------------------
