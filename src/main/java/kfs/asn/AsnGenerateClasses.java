@@ -27,7 +27,7 @@ public class AsnGenerateClasses {
     private final ArrayList<AsnGenerateClasses> classes;
     private final StringBuilder output;
 
-    public AsnGenerateClasses(String packageName, ASNClass cls/*, kfsCreatePojoClass master*/) {
+    public AsnGenerateClasses(String packageName, ASNClass cls) {
         this.classes = new ArrayList<AsnGenerateClasses>();
         this.asnName = cls.name;
         String[] names = AsnUtil.getNamesFromJavaName(asnName);
@@ -36,12 +36,13 @@ public class AsnGenerateClasses {
         this.className = AsnUtil.getHumanName(names, "").toString();
         this.javaName = AsnUtil.getJavaName(names).toString();
 
-        output = new StringBuilder().append(getClassString(packageName, cls/*, master*/));
+        output = new StringBuilder().append(getClassString(packageName, cls));
     }
 
-    private CharSequence getClassString(String packageName, ASNClass cls/*, kfsCreatePojoClass master*/) {
+    private CharSequence getClassString(String packageName, ASNClass cls) {
         StringBuilder sb = new StringBuilder();
         StringBuilder sg = new StringBuilder();
+        StringBuilder cl = new StringBuilder();
         sb.append("package ").append(packageName).append(";\n\n");
         sb.append("import java.util.Arrays;\n");
         sb.append("import java.util.List;\n");
@@ -68,12 +69,7 @@ public class AsnGenerateClasses {
                 + "        this.id = id;\n"
                 + "    }\n"
                 + "");
-        /*
-         if (master != null) {
-         sb.append("    @ManyToOne\n");
-         sb.append("    private ").append(master.className).append(" ").append(master.javaName).append(";\n\n");
-         }
-         */
+        
         int maxJavaNameLength = 0;
 
         if (cls.fields != null) {
