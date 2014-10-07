@@ -98,17 +98,17 @@ public class AsnGenerateClasses {
                     sb.append("    private ").append(varCls.getSimpleName())//
                             .append(" ").append(javaVarName).append(";\n\n");
 
-                    sg.append(getGetterSetter(varCls.getSimpleName(), sgName, javaVarName));
+                    sg.append(getGetterSetter(varCls.getSimpleName(), sgName, javaVarName, true, false));
 
                 } else {
                     AsnGenerateClasses inCls = new AsnGenerateClasses(packageName, field.type);
                     sb.append("    @OneToMany\n");
                     if (field.isArray() || field.type.isSet() || field.type.isSequence()) {
                         sb.append("    private List<").append(inCls.className).append("> ").append(javaVarName).append(";\n\n");
-                        sg.append(getGetterSetter("List<" + inCls.className + ">", sgName, javaVarName));
+                        sg.append(getGetterSetter("List<" + inCls.className + ">", sgName, javaVarName, false, true));
                     } else {
                         sb.append("    private ").append(inCls.className).append(" ").append(javaVarName).append(";\n\n");
-                        sg.append(getGetterSetter(inCls.className, sgName, javaVarName));
+                        sg.append(getGetterSetter(inCls.className, sgName, javaVarName, false, false));
                     }
                     classes.add(inCls);
 
@@ -126,11 +126,11 @@ public class AsnGenerateClasses {
                 String javaVarName = AsnUtil.getJavaName(names).toString();
                 if (AsnConst.isPrimitive(field.type.name) || (!field.isArray() && !field.type.isSet() && !field.type.isSequence())) {
                     sb.append("        sb.append(\"  ").append(javaVarName)//
-                            .append(new String(new char[maxJavaNameLength - javaVarName.length() + 1]).replace("\0", " "))//
+                            .append(AsnUtil.getSpace(maxJavaNameLength - javaVarName.length() + 1," "))//
                             .append(" = \").append(").append(javaVarName).append(").append(\"\\n\");\n");
                 } else {
                     sb.append("        sb.append(\"  ").append(javaVarName)//
-                            .append(new String(new char[maxJavaNameLength - javaVarName.length() + 1]).replace("\0", " "))//
+                            .append(AsnUtil.getSpace(maxJavaNameLength - javaVarName.length() + 1, " "))//
                             .append(" = \").append(Arrays.deepToString(").append(javaVarName).append(".toArray())).append(\"\\n\");\n");
                 }
             }
@@ -143,8 +143,8 @@ public class AsnGenerateClasses {
         return sb;
     }
 
-    private CharSequence getGetterSetter(String className, String sgName, String javaVarName) {
-        return new StringBuilder()//
+    private CharSequence getGetterSetter(String className, String sgName, String javaVarName, boolean pri, boolean list) {
+        StringBuilder sb = new StringBuilder()//
                 .append("    public ").append(className).append(" get")//
                 .append(sgName).append("() { \n")//
                 .append("        return ").append(javaVarName)//
@@ -154,13 +154,29 @@ public class AsnGenerateClasses {
                 .append(javaVarName).append(" ) { \n")//
                 .append("        this.").append(javaVarName).append(" = ")//
                 .append(javaVarName).append(";\n")//
-                .append("    }\n\n")//
-                .append("    //public void set").append(sgName)//
-                .append("(AsnData ").append(javaVarName).append(" ) { \n" + "  //      this.")//
-                .append(javaVarName).append(" = ")//
-                .append(javaVarName)
-                .append(".getByteArray().toString();\n"
-                        + "  //  }\n\n");
+                .append("    }\n\n");
+        if (pri) {
+            sb
+                    .append("//    public void set").append(sgName).append("(AsnData ").append(javaVarName).append(" ) { \n")
+                    .append("//        this.").append(javaVarName).append(" = ").append(javaVarName).append(".getByteArray().toString();\n")
+                    .append("//    }\n\n");
+        }
+        if (list) {
+            sb
+                    .append("    public void set").append(sgName).append("Asn (").append(className).append(" ").append(javaVarName).append(" ) { \n")
+                    .append("        ArrayList al = new ArrayList(").append(javaVarName).append(".size());\n")
+                    .append("        for (Object o : ").append(javaVarName).append(") {\n")
+                    .append("            if (o instanceof AsnData)\n")
+                    .append("//                al.add(AsnUtil.getIp(((AsnData)o).getByteArray()));\n")
+                    .append("                al.add(((AsnData)o).getData(String.class));\n")
+                    .append("            else\n")
+                    .append("                System.err.println(o.getClass().getSimpleName());\n")
+                    .append("        }\n")
+                    .append("        this.").append(javaVarName).append(" = al;\n")
+                    .append("//    }\n\n");
+        }
+
+        return sb;
     }
 
     public static void save(String dir, String packageName, GramarFile gramar) throws IOException {
