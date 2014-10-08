@@ -20,8 +20,7 @@ public class RawClassFactory {
 
         String[] convStr = convertStr(fileName.lines);
         if (convStr == null) {
-           throw new ASNException("ASN Grammar File(" + fileName.filename + //
-                   ") does not contain any module.");
+           throw new ASNException("ASN Grammar File does not contain any module.");
         }
 
         String rootClassName0 = null;
