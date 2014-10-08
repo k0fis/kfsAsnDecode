@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import kfs.asn.utils.AsnConst;
 import kfs.asn.utils.ASNException;
 import kfs.asn.utils.ASNClassFactory;
@@ -44,12 +45,20 @@ public class AsnDecoder {
         }
     }
 
-    public Object parse(InputStream dataFile, GramarFile grammarFile) throws IOException {
+    public Object parse(InputStream dataFile, GramarFile grammarFile) {
+        return parse(dataFile, grammarFile, null);
+    }
+    public Object parse(InputStream dataFile, GramarFile grammarFile, AsnNodeCallBack directCb)  {
         Field rootField = new ASNClassFactory(grammarFile).getField();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         while (true) {
-            int r = dataFile.read(buffer);
+            int r;
+            try {
+                r = dataFile.read(buffer);
+            } catch (IOException ex) {
+                throw new ASNException(null, "Cannot read data", ex);
+            }
             if (r == -1) {
                 break;
             }
@@ -58,14 +67,14 @@ public class AsnDecoder {
         byte[] byteArr = out.toByteArray();
         EBlock rootBlock = new EBlock(0, 0, byteArr, 0, 0, byteArr.length);
 
-        Object topNode = makeNode(rootField, rootBlock, -1, 0);
+        Object topNode = makeNode(rootField, rootBlock, -1, 0, directCb);
         // Assumption is that for all Grammar files the topNode's type is always an array
         // ie.   topNode.getType().isArray() == true
         //return topNode.subNodes;
         return topNode;
     }
 
-    private Object makeNode(Field asnField, EBlock b, int maxBlocks, int depth) {
+    private Object makeNode(Field asnField, EBlock b, int maxBlocks, int depth, AsnNodeCallBack directCb) {
         try {
             if (b.isLeaf()) {
                 Integer tag = AsnConst.getPrimitiveMap().get(asnField.type.name);
@@ -76,7 +85,7 @@ public class AsnDecoder {
                 }
             }
             if (asnField.isArray()) {
-                return makeNodeArray(asnField, b, maxBlocks, depth);
+                return makeNodeArray(asnField, b, maxBlocks, depth, directCb);
             }
             Class cls = nodeMap.get(asnField.type.name);
             //Logger.getLogger(getClass()).info(cls.getSimpleName());
@@ -143,7 +152,7 @@ public class AsnDecoder {
                 if (param == null) {
                     Field childAsnField = asnField.getChildField(sbpos);
                     if (childAsnField != null) {
-                        param = makeNode(childAsnField, subBlock, maxBlocks, depth + 1);
+                        param = makeNode(childAsnField, subBlock, maxBlocks, depth + 1, directCb);
                     }
                 }
                 if (param != null) {
@@ -159,6 +168,10 @@ public class AsnDecoder {
                             + sbpos + ") field(" + asnField + ")";
                     Logger.getLogger(AsnDecoder.class).fatal(str);
                 }
+            }
+            if (directCb != null) {
+                if (directCb.acceptCls(obj.getClass())) 
+                    directCb.kfsCb(obj);
             }
             fireCallBack(obj);
             return obj;
@@ -221,7 +234,7 @@ public class AsnDecoder {
         return null;
     }
 
-    private Object makeNodeArray(Field f, EBlock b, int maxBlocks, int depth) {
+    private Object makeNodeArray(Field f, EBlock b, int maxBlocks, int depth, AsnNodeCallBack directCb) {
 
         ArrayList<EBlock> subBlocks = b.getSubBlocks(EBlock.MAX_BLOCKS, f.type.blockSize, f.type.paddingByte);
         ArrayList list = new ArrayList(subBlocks.size());
@@ -234,7 +247,7 @@ public class AsnDecoder {
                 if (refChildField == null) {
                     throw new ASNException("makeNodeArray", "No child field at pos 'sbpos' for Reference Array.");
                 } else {
-                    Object refChildNode = makeNode(refChildField, subBlock, maxBlocks, depth + 1);
+                    Object refChildNode = makeNode(refChildField, subBlock, maxBlocks, depth + 1, directCb);
                     if (refChildNode != null) {
                         list.add(refChildNode);
                     }
@@ -244,7 +257,7 @@ public class AsnDecoder {
 
             Field f_nav = f.getCachedCloneNoneArray();
             for (EBlock subBlock : subBlocks) {
-                Object node = makeNode(f_nav, subBlock, maxBlocks, depth + 1);
+                Object node = makeNode(f_nav, subBlock, maxBlocks, depth + 1, directCb);
                 if (node != null) {
                     list.add(node);
                 }
