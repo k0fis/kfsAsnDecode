@@ -134,7 +134,7 @@ public class AsnGenerateClasses {
                 }
             }
         }
-        sb.append("        sb.append(\"}\\n\");\n");
+        sb.append("        sb.append(\"}\");\n");
         sb.append("        return sb.toString();\n");
         sb.append("    }\n\n");
         sb.append(sg);
@@ -144,15 +144,10 @@ public class AsnGenerateClasses {
 
     private CharSequence getGetterSetter(String className, String sgName, String javaVarName, boolean pri, String listInName) {
         StringBuilder sb = new StringBuilder()//
-                .append("    public ").append(className).append(" get")//
-                .append(sgName).append("() { \n")//
-                .append("        return ").append(javaVarName)//
-                .append(";\n    }\n\n")//
-                .append("    public void set")//
-                .append(sgName).append("(").append(className).append(" ")//
-                .append(javaVarName).append(" ) { \n")//
-                .append("        this.").append(javaVarName).append(" = ")//
-                .append(javaVarName).append(";\n")//
+              //  .append("    public ").append(className).append(" get").append(sgName).append("() { \n")//
+              //  .append("        return ").append(javaVarName).append(";\n    }\n\n")//
+                .append("    public void set").append(sgName).append("(").append(className).append(" ").append(javaVarName).append(" ) { \n")//
+                .append("        this.").append(javaVarName).append(" = ").append(javaVarName).append(";\n")//
                 .append("    }\n\n");
         if (pri) {
             sb
